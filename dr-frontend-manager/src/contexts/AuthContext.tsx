@@ -1,14 +1,22 @@
 'use client'
 
-import { fetchWrapper } from '@/api/fetch';
 import User from '@/model/User';
-import Router from 'next/router';
-import React, { createContext, useState } from 'react';
+import { api } from '@/services/axios';
+import React, { createContext, useEffect, useState } from 'react';
+import { setCookie, parseCookies } from 'nookies';
+import { useRouter } from 'next/navigation'
+import { recoverUserInfo } from '@/api/user';
+
 
 type AuthContextType = {
   isAuthenticated: boolean;
-  user: User;
+  user: User | null;
   signIn: (data: SignInData) => Promise<void>;
+}
+
+type UserData = {
+  token: string,
+  user: User
 }
 
 type SignInData = {
@@ -19,24 +27,30 @@ type SignInData = {
 export const AuthContext = createContext({} as AuthContextType);
 
 export function AuthProvider({children}: Readonly<{children: React.ReactNode}>){
-  const [user, setUser] = useState<User>({} as User)
+  const router = useRouter()
+  const [user, setUser] = useState<User | null>(null)
   const isAuthenticated = !!user;
 
+  useEffect(() => {
+    const { 'deep.auth.token': token } = parseCookies()
+    if(token) recoverUserInfo(token).then(user => setUser(user))
+  })
+
   async function signIn({ email, password }: SignInData){
-    console.log("Calling the signin function")
-    console.log(`The email is ${email} and the password is ${password}`)
-
-    const data = await fetchWrapper('login', 
-      JSON.stringify({
-        email : email,
-        password: password
-      })
-    )
+    const response = await api.post<UserData>('login', {
+      email: email,
+      password: password
+    })
     
+    setCookie(undefined, 'deep.auth.token', response.data.token, {
+      maxAge: 60 * 60 * 8 // 8 hours
+    })
 
-    console.log(data)
+    api.defaults.headers['Authorization'] = `Bearer ${response.data.token}`
 
-    // Router.push('/home')
+    setUser(response.data.user)
+
+    router.push('/home')
   }
 
   return (

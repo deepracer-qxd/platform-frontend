@@ -9,7 +9,7 @@ export default function Home() {
   const { register, handleSubmit } = useForm();
   const { signIn } = useContext(AuthContext);
 
-  async function handleSignIn(data){
+  async function handleSignIn(data: any){
     await signIn(data);
   }
 
@@ -18,7 +18,7 @@ export default function Home() {
       <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-sm">
 
-          <Image className="mx-auto h-36 w-auto" alt="DeepRacerQxd logo" src={'dr-qxd-logo.svg'} width={150} height={150}/>
+          <Image priority={true} className="mx-auto h-36 w-auto" alt="DeepRacerQxd logo" src={'dr-qxd-logo.svg'} width={150} height={150}/>
           <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-white">
             Sign in to your account
           </h2>
