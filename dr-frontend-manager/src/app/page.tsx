@@ -1,8 +1,18 @@
+'use client'
 import Link from 'next/link'
 import Image from 'next/image'
-
+import { useForm } from 'react-hook-form'
+import { useContext } from 'react';
+import { AuthContext } from '@/contexts/AuthContext';
 
 export default function Home() {
+  const { register, handleSubmit } = useForm();
+  const { signIn } = useContext(AuthContext);
+
+  async function handleSignIn(data){
+    await signIn(data);
+  }
+
   return (
     <>
       <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
@@ -15,13 +25,14 @@ export default function Home() {
         </div>
 
         <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-          <form className="space-y-6" action="#" method="POST">
+          <form className="space-y-6" action="#" method="POST" onSubmit={handleSubmit(handleSignIn)}>
             <div>
               <label htmlFor="email" className="block text-sm font-medium leading-6  text-white">
                 Email address
               </label>
               <div className="mt-2">
                 <input
+                  {...register('email')}
                   id="email"
                   name="email"
                   type="email"
@@ -45,6 +56,7 @@ export default function Home() {
               </div>
               <div className="mt-2">
                 <input
+                  {...register('password')}
                   id="password"
                   name="password"
                   type="password"
